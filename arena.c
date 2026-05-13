@@ -1,5 +1,6 @@
 #include "arena.h"
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -12,9 +13,11 @@ mem_arena *arena_create(u64 reserve_size, u64 commit_size) {
   mem_arena *arena = plat_mem_reserve(reserve_size);
 
   if (!plat_mem_commit(arena, commit_size)) {
+    fprintf(stderr, "Failed to commit memory");
     exit(EXIT_FAILURE);
   }
 
+  printf("%ld\n", sizeof(*arena));
   arena->reserve_size = reserve_size;
   arena->commit_size = commit_size;
   arena->pos = ARENA_BASE_POS;
@@ -32,7 +35,8 @@ void *arena_push(mem_arena *arena, u64 size, b32 non_zero) {
   u64 new_pos = pos_aligned + size;
 
   if (new_pos > arena->reserve_size) {
-    return NULL;
+    fprintf(stderr, "Failed to push to arena");
+    exit(EXIT_FAILURE);
   }
 
   if (new_pos > arena->commit_pos) {
@@ -44,21 +48,23 @@ void *arena_push(mem_arena *arena, u64 size, b32 non_zero) {
     u8 *mem = (u8 *)arena + arena->commit_pos;
     u64 commit_size = new_commit_pos - arena->commit_pos;
 
-    if (!plat_mem_commit(mem, commit_size))
-      return NULL;
+    if (!plat_mem_commit(mem, commit_size)) {
+      fprintf(stderr, "Failed to commit memory");
+      exit(EXIT_FAILURE);
 
-    arena->commit_pos = new_commit_pos;
+      arena->commit_pos = new_commit_pos;
+    }
+
+    arena->pos = new_pos;
+
+    u8 *out = (u8 *)arena + pos_aligned;
+
+    if (!non_zero) {
+      memset(out, 0, size);
+    }
+
+    return out;
   }
-
-  arena->pos = new_pos;
-
-  u8 *out = (u8 *)arena + pos_aligned;
-
-  if (!non_zero) {
-    memset(out, 0, size);
-  }
-
-  return out;
 }
 
 void arena_pop(mem_arena *arena, u64 size) {
@@ -103,8 +109,6 @@ b32 plat_mem_release(void *ptr, u64 size) {
 
 #elif defined(__linux__)
 
-#define _DEFAULT_SOURCE
-
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -113,14 +117,15 @@ u32 plat_get_pagesize(void) { return (u32)sysconf(_SC_PAGESIZE); }
 void *plat_mem_reserve(u64 size) {
   void *out = mmap(NULL, size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (out == MAP_FAILED) {
-    return NULL;
+    fprintf(stderr, "Failed to commit memory");
+    exit(EXIT_FAILURE);
   }
 
   return out;
 }
 
 b32 plat_mem_commit(void *ptr, u64 size) {
-  i32 ret = mprotect(ptr, size, PROT_NONE);
+  i32 ret = mprotect(ptr, size, PROT_READ | PROT_WRITE);
 
   return ret == 0;
 }

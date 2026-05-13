@@ -7,6 +7,7 @@
 #define PUSH_ARRAY(arena, T, n) (T *)arena_push((arena), sizeof(T) * (n), false)
 #define PUSH_ARRAY_NZ(arena, T, n)                                             \
   (T *)arena_push((arena), sizeof(T) * (n), true)
+#define ALIGN_UP_POW2(n, p) (((u64)(n) + ((u64)(p) - 1)) & (~((u64)(p) - 1)))
 
 typedef struct {
   u64 reserve_size;
