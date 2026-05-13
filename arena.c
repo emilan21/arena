@@ -17,7 +17,6 @@ mem_arena *arena_create(u64 reserve_size, u64 commit_size) {
     exit(EXIT_FAILURE);
   }
 
-  printf("%ld\n", sizeof(*arena));
   arena->reserve_size = reserve_size;
   arena->commit_size = commit_size;
   arena->pos = ARENA_BASE_POS;
