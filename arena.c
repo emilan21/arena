@@ -50,20 +50,19 @@ void *arena_push(mem_arena *arena, u64 size, b32 non_zero) {
     if (!plat_mem_commit(mem, commit_size)) {
       fprintf(stderr, "Failed to commit memory");
       exit(EXIT_FAILURE);
-
-      arena->commit_pos = new_commit_pos;
     }
-
-    arena->pos = new_pos;
-
-    u8 *out = (u8 *)arena + pos_aligned;
-
-    if (!non_zero) {
-      memset(out, 0, size);
-    }
-
-    return out;
+    arena->commit_pos = new_commit_pos;
   }
+
+  arena->pos = new_pos;
+
+  u8 *out = (u8 *)arena + pos_aligned;
+
+  if (!non_zero) {
+    memset(out, 0, size);
+  }
+
+  return out;
 }
 
 void arena_pop(mem_arena *arena, u64 size) {
