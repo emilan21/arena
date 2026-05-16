@@ -1,3 +1,7 @@
 -std=c11
+-Wall
+-Wextra
+-Wpedantic
+-g
 -Iinclude
 -I../base/include
