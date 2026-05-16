@@ -1,4 +1,7 @@
-#include "include/base.h"
+#ifndef ARENA_ARENA_H
+#define ARENA_ARENA_H
+
+#include <base/base.h>
 
 #define ARENA_BASE_POS (sizeof(mem_arena))
 #define ARENA_ALIGN (sizeof(void *))
@@ -30,3 +33,5 @@ void *plat_mem_reserve(u64 size);
 b32 plat_mem_commit(void *ptr, u64 size);
 b32 plat_mem_decommit(void *ptr, u64 size);
 b32 plat_mem_release(void *ptr, u64 size);
+
+#endif

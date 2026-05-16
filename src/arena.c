@@ -1,4 +1,5 @@
-#include "arena.h"
+#include "arena/arena.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,7 +80,7 @@ void arena_clear(mem_arena *arena) { arena_pop_to(arena, ARENA_BASE_POS); }
 
 #if defined(_WIN32)
 
-#include <winddows.h>
+#include <windows.h>
 
 u32 plat_get_pagesize(void) {
   SYSTEM_INFO sysinfo = {0};
@@ -106,6 +107,8 @@ b32 plat_mem_release(void *ptr, u64 size) {
 }
 
 #elif defined(__linux__)
+
+#define _DEFAULT_SOURCE
 
 #include <sys/mman.h>
 #include <unistd.h>
